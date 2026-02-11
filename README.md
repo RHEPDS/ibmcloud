@@ -13,3 +13,4 @@ https://catalog.demo.redhat.com/workshop/qmzstn
 If you get an error message "Lab is full", please try the other one
 
 
+https://www.redhat.com/en/interactive-experiences
