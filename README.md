@@ -10,7 +10,13 @@ https://catalog.demo.redhat.com/workshop/7at6be
 
 https://catalog.demo.redhat.com/workshop/qmzstn
 
-If you get an error message "Lab is full", please try the other one
 
+## Partner Demo Platform
 
 https://www.redhat.com/en/interactive-experiences
+
+### Interactive experience (work also without any Login)
+
+https://www.redhat.com/en/interactive-experiences
+
+
