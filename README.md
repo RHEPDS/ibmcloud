@@ -6,9 +6,9 @@
 
 https://catalog.demo.redhat.com/workshop/h288af
 
-## LAB B
+## LAB C
 
-https://catalog.demo.redhat.com/workshop/722wx2
+https://catalog.partner.demo.redhat.com/workshop/uwajqm
 
 ## Partner Demo Platform
 
