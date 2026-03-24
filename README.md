@@ -4,7 +4,7 @@
 
 ## LAB I
 
-https://catalog.demo.redhat.com/workshop/h288a
+https://catalog.demo.redhat.com/workshop/h288af
 
 ## LAB II
 
