@@ -4,12 +4,11 @@
 
 ## LAB I
 
-https://catalog.demo.redhat.com/workshop/7at6be
+https://catalog.demo.redhat.com/workshop/h288a
 
 ## LAB II
 
-https://catalog.demo.redhat.com/workshop/qmzstn
-
+https://catalog.demo.redhat.com/workshop/722wx2
 
 ## Partner Demo Platform
 
