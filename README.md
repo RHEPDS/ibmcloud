@@ -1,5 +1,9 @@
 # OpenShift Virtualisation
 
+## Migration Assessment
+
+https://console.redhat.com/openshift/migration-assessment/assessments
+
 ## There are two identical labs provided (for 20 Useres each)
 
 ## LAB A
