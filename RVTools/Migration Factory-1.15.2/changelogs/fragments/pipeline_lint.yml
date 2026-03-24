@@ -1,0 +1,11 @@
+---
+minor_changes:
+  - Install all collections (including those requiring a subscription) prior to linting. Version requirements were set at greater than or equal to what is latest today.
+  - Added an rc script to pipeline to identify path to dnf and pip package manager
+  - Changed all gitlab ci file extensions (except ./.gitlab-ci.yml) to use .yaml extension to provide type hinting for IDEs and linters
+  - Changed offline settings from true to false in .ansible-lint config to eliminate extra downloads of cached content
+  - Added README to .gitlab folder for how to add CI/CD variables to pull content
+bugfixes:
+  - Isolated the linting issues due to not having the collection dependencies installed
+  - Fixed code coverage job that was failing due to not being able to find pip
+...

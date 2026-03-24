@@ -1,0 +1,7 @@
+---
+breaking_changes:
+  - Rename colleection to redhat.openshift_virtualization_migration
+  - Rename collection to infra.openshift_virtualization_migration
+minor_changes:
+  - Additional update for migration annotation
+...

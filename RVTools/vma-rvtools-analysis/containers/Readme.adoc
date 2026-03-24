@@ -1,0 +1,146 @@
+= Containers
+:doctype: book
+:toc:
+
+This is where all Containerfiles and files specific to building containers are located. It is not necessary to build a container to run `rvtools-virt-analasis`, but in some cases it is preferred. In older Linux distros for example where python versions and the available modules are not current for example, this might be the best option.
+
+== Build tools
+
+Most commonly we prefer either `podman`` or `buildah` for building these images as these tools are OCI compliant and build rootless containers. You may use other tools but you may need to modify the Containerfile to comply with other build tools (Docker for example).
+
+== The build
+
+[NOTE]
+====
+There are different build types, one (`Containerfile-full`) adds the required libraries to use the export option to save reports (export as PDF, MarkDown, HTML, etc...). Another one (`Containerfile-no-export`) build type is smaller (~1.3G vs 3.75G) image but lacks the ability to save/export the reports. You can still use the file menu to print the reports and use your printer settings to "Print to PDF" usually, but the PDF will not be formatted as well (Title header, better fonts, footer, etc...). The last one (`Containerfile-light`) gives an example using a light weight ubi9 based image but lacks export libs and Xvfb support which will stop some of the later reports from running but is very light weight (~975M).
+====
+
+[IMPORTANT]
+====
+These build commands are to be run from the root of the repo. Note the `-f` expects to find a `containers` folder (and `Containerfile` under that) inside the directory you run the build command from.   
+====
+
+=== Buildah
+
+.Buildah example build command (Fedora based image)
+[source,bash]
+----
+$ cd containers
+$ buildah bud -t rvtools-virt-analysis-full -f containers/Containerfile-full .
+----
+
+.Buildah example no-export build command (Fedora based image)
+[source,bash]
+----
+$ buildah bud -t rvtools-virt-analysis-no-export -f containers/Containerfile-no-export .
+----
+
+.Buildah example no-export, no-Xvfb build command (UBI9 bsaed image)
+[source,bash]
+----
+$ buildah bud -t rvtools-virt-analysis-light -f containers/Containerfile-light .
+----
+
+=== Podman
+
+.Podman example build command (Fedora based image)
+[source,bash]
+----
+$ podman build -t rvtools-virt-analysis-full -f containers/Containerfile-full .
+----
+
+.Podman example no-export build command (Fedora based image)
+[source,bash]
+----
+$ podman build -t rvtools-virt-analysis-no-export -f containers/Containerfile-no-export .
+----
+
+.Podman example no-export, no-Xvfb build command (UBI9 based image)
+[source,bash]
+----
+$ podman build -t rvtools-virt-analysis-light -f containers/Containerfile-light .
+----
+
+== The image
+
+The container files here make the assumption that you do not want to add the `xlsx` files to the image directly. This avoids the need to rebuild the images each time you change (or have new) data files. This option makes this container way more usable and flexible. It also means you have to mount a volume to get your `xlsx` files into the running image. 
+
+Following the steps in the main README in the root of this repo, we would start at the `Preparing the Data` step (specifically steps 3 - 5) as the ones above and below these steps are all done for you in this container. The key difference is that now we create a `data` folder, add files to it, and later mount it as a volume in the container when we start it.
+
+[WARNING]
+====
+As mentioned in the main README:
+
+All RVTools export files must be in lowercase, including both the filenames and the corresponding names referenced in index.xlsx.
+Failure to maintain consistent lowercase formatting may result in errors during data processing.
+====
+
+=== Running the container
+
+Finally we are ready to run the container, almost...
+
+There are some key details we need to know here.
+
+- Jupyter runs on port 8888 in this image so we have to map the port to your local/host machine. 
+- Jupyter expects find your exported `xlsx` files and an index.xlsx file in it's data folder so we have to mount the local data folder 
+
+.Podman example run
+[source,bash]
+----
+$ podman run -d --rm --name rvtools-virt-analysis --volume $(pwd)/data:/app/data:z -p 8888:8888 rvtools-virt-analysis
+----
+
+[NOTE]
+====
+The volume mount in this example uses the `:z` SELinux option to set the `container_file_t` context on the volume. If SELinux is disabled on your distro or you are using a distro that does not have SELinux, you can safely exclude the `:z` options.
+
+Example:
+`--volume $(pwd)/data:/app/data`
+====
+
+=== Watching the logs
+
+When runnin the image in detached mode (`-d` or `--detach`) you will not see the logs from this container. To see the logs you can use `podman logs <container>`:
+
+[source,bash]
+----
+$ podman logs -f rvtools-virt-analysis
+----
+
+
+
+
+[source,text]
+----
+[I 2025-03-05 04:48:10.451 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2025-03-05 04:48:10.453 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[I 2025-03-05 04:48:10.455 ServerApp] jupyterlab | extension was successfully linked.
+[I 2025-03-05 04:48:10.455 ServerApp] Writing Jupyter server cookie secret to /app/.local/share/jupyter/runtime/jupyter_cookie_secret
+[I 2025-03-05 04:48:10.568 ServerApp] notebook_shim | extension was successfully linked.
+[I 2025-03-05 04:48:10.575 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2025-03-05 04:48:10.576 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2025-03-05 04:48:10.577 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2025-03-05 04:48:10.577 LabApp] JupyterLab extension loaded from /app/.venv/lib64/python3.13/site-packages/jupyterlab
+[I 2025-03-05 04:48:10.577 LabApp] JupyterLab application directory is /app/.venv/share/jupyter/lab
+[I 2025-03-05 04:48:10.578 LabApp] Extension Manager is 'pypi'.
+[I 2025-03-05 04:48:10.593 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2025-03-05 04:48:10.593 ServerApp] Serving notebooks from local directory: /app
+[I 2025-03-05 04:48:10.593 ServerApp] Jupyter Server 2.15.0 is running at:
+[I 2025-03-05 04:48:10.593 ServerApp] http://c95c9bdb667b:8888/lab?token=c44afd54c4d2259b661c742a77668e1f5fab69138838a4e2
+[I 2025-03-05 04:48:10.593 ServerApp]     http://127.0.0.1:8888/lab?token=c44afd54c4d2259b661c742a77668e1f5fab69138838a4e2
+[I 2025-03-05 04:48:10.593 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 2025-03-05 04:48:10.596 ServerApp] 
+    
+
+To access the server, open this file in a browser:
+    file:///root/.local/share/jupyter/runtime/jpserver-1-open.html
+Or copy and paste one of these URLs:
+    http://49d6660cece7:8888/lab?token=<token>
+    http://127.0.0.1:8888/lab?token=<token> <<<< Open this link
+
+----
+
+[IMPORTANT]
+====
+The startup logs will display the URL with token to access the Jupyter web ui. You cannot authenticate to this tool without having this token, so either run the container in the foreground or access the logs right after you start the container to see the logs. 
+====

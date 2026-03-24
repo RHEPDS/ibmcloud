@@ -1,0 +1,8 @@
+---
+minor_changes:
+  - Removed references to non-existant roles that were removed as part of clean up
+  - Added a default hosts value for preseed playbooks to remediate linting errors
+  - Organized requirements.yml with comments to clarify content sources
+  - Updated pipeline to leverage both published and validated content sources
+  - Disabled allow_failure setting on ansible-lint min profile
+...

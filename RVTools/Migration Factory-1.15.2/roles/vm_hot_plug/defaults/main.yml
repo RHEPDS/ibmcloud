@@ -1,0 +1,23 @@
+---
+# defaults file for vm_hot_plug
+
+vm_hot_plug_request: []
+# -  namespace: <namespace> # Namespace containing VMs to perform operations against. \
+# Optional unless specifying 'names'.
+#    names: # List of VM's within a namespace
+#    label_selectors: # Label Selectors to apply. Cannot be used with list of VM names
+#      - <key>=<value>
+#    compute:
+#      cpu: <value>
+#      memory: <memory>
+#    storage:
+#      - name: <name>
+#        create: true
+#        pvcSpec: # PVC Spec
+
+vm_hot_plug_openshift_host: "{{ openshift_host }}"
+vm_hot_plug_api_key: "{{ openshift_api_key }}"
+vm_hot_plug_openshift_verify_ssl: "{{ openshift_verify_ssl }}"
+vm_hot_plug_kubevirt_api_version: kubevirt.io/v1
+
+...

@@ -1,0 +1,9 @@
+---
+minor_changes:
+  - Commented vars reference aap channel and version on inventory because now they have default values defined.
+
+bugfixes:
+  - Added default value of 'stable-2.5' for aap_channel var on aap_deploy role.
+  - Added default value of '2.5' for aap_version var on aap_deploy role.
+  - Define default value of true for validate_certs attribute when openshift_verify_ssl is not defined on create_mf_aap_token role
+...

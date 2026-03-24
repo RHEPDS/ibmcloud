@@ -1,0 +1,90 @@
+FROM registry.fedoraproject.org/fedora:41
+LABEL authors="David Dreggors <david.dreggors@redhat.com>"
+
+ENV USER=analysis
+ENV GROUPNAME=$USER
+ENV UID=12345
+ENV GID=23456
+ENV PATH="/app/.venv/bin:$PATH"
+ENV DISPLAY :99
+
+WORKDIR /app/
+COPY ["containers/run.sh", "requirements.txt", "/app/"]
+COPY ./data /app/data
+COPY ./notebooks /app/notebooks
+
+# All pandoc, xelatex, and texlive packages are required for exporting to PDF
+# If printing 
+RUN dnf update -y && \
+    dnf install -y \
+      gcc \
+      gcc-c++ \
+      python3 \
+      python3-devel \
+      xclip.x86_64 \
+      xorg-x11-server-Xvfb \
+      texlive-collection-fontsrecommended \
+      texlive-collection-latexextra \
+      texlive-adjustbox texlive-adjustbox \
+      texlive-caption texlive-collectbox \
+      texlive-enumitem texlive-environ \
+      texlive-eurosym texlive-etoolbox \
+      texlive-jknapltx \
+      texlive-parskip \
+      texlive-pdfcol \
+      texlive-pgf \
+      texlive-rsfs \
+      texlive-tcolorbox \
+      texlive-titling \
+      texlive-trimspaces \
+      texlive-ucs \
+      texlive-ulem \
+      texlive-upquote \
+      texlive-ltxcmds \
+      texlive-infwarerr \
+      texlive-iftex \
+      texlive-kvoptions \
+      texlive-kvsetkeys \
+      texlive-float \
+      texlive-geometry \
+      texlive-amsmath \
+      texlive-fontspec \
+      texlive-unicode-math \
+      texlive-fancyvrb \
+      texlive-grffile \
+      texlive-hyperref \
+      texlive-booktabs \
+      texlive-soul \
+      texlive-ec \
+      texlive-grffile \
+      texlive-unicode-math \
+      texlive-eurosym \                                                                                                                                                                                                                                                                                      
+      texlive-upquote \
+      texlive-parskip \
+      texlive-pdfcol \
+      texlive-tcolorbox \
+      xelatex \
+      pandoc && \
+    groupadd \
+        --gid "$GID" \
+        "$GROUPNAME" && \
+    useradd \
+      --comment "RVTools Analysis User" \
+      --home "/app" \
+      --gid "$GID" \
+      --no-create-home \
+      --uid "$UID" \
+      $USER && \
+      chown -R $UID:$GID /app && \
+      chmod +x run.sh
+
+USER $USER
+RUN /usr/bin/python3 -m venv /app/.venv && \
+  source /app/.venv/bin/activate && \
+  /app/.venv/bin/pip install --upgrade pip
+
+RUN sed -e 's/==/>=/g' /app/requirements.txt && \
+  /app/.venv/bin/pip install -r requirements.txt
+
+EXPOSE 8888
+ENTRYPOINT ["/app/run.sh"]

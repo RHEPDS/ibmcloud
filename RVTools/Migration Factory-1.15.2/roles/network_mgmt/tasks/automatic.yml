@@ -1,0 +1,50 @@
+---
+
+- name: automatic | Validate required variables
+  ansible.builtin.assert:
+    that:
+      - (network_mgmt_openshift_node_network_ports | default([]) ) is iterable
+      - (network_mgmt_openshift_node_network_ports | default([]) ) is not string
+      - network_mgmt_openshift_node_network_ports | default([]) | length > 0
+      - network_mgmt_vcenter_dvswitch | default('', true) | trim | length > 0
+      - network_mgmt_vcenter_datacenter | default('', true) | trim | length > 0
+
+- name: automatic | Validate supported bonding mode
+  ansible.builtin.assert:
+    fail_msg: >-
+      "{{ network_mgmt_openshift_network_bond_mode }} is not a supported bond mode.
+      Supported bond modes: {{  network_mgmt_openshift_network_supported_bond_modes | join(',') }}"
+    that:
+      - network_mgmt_openshift_network_bond_mode in network_mgmt_openshift_network_supported_bond_modes
+  when:
+    - not (network_mgmt_override_openshift_supported_bond_mode | default(false))
+
+- name: automatic | Include tasks from gather_networks.yml
+  ansible.builtin.include_tasks:
+    file: gather_networks.yml
+
+- name: automatic | Set the switches and portgroups to migrate
+  ansible.builtin.set_fact:
+    switches_to_migrate: >-
+      {{
+        dvswitch_info.distributed_virtual_switches |
+        json_query("[].{name: configure.name, mtu: configure.settings.properties.advanced.maxMtu}" )
+      }}
+    portgroups_to_migrate: >-
+      {{
+        dvpg_info.dvs_portgroup_info
+        | dict2items(key_name="name", value_name="ports")
+        | map(attribute="ports")
+        | flatten
+        | json_query("[].{name: portgroup_name, switch: dvswitch_name,vlan: vlan_info, \
+                      uplinks: sum([length(active_uplinks),length(standby_uplinks)])}")
+      }}
+
+- name: automatic | Include tasks from create_nncp.yml
+  ansible.builtin.include_tasks:
+    file: create_nncp.yml
+
+- name: automatic | Include tasks from create_nad.yml
+  ansible.builtin.include_tasks:
+    file: create_nad.yml
+...

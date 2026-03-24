@@ -1,0 +1,7 @@
+---
+
+- name: _compute | Processing Compute Change
+  when: "'compute' in vm_hot_plug_vm and vm_hot_plug_vm['compute'] is not none"
+  ansible.builtin.set_fact:
+    vm_hot_plug_patch: "{{ vm_hot_plug_patch | default({}) | ansible.builtin.combine(lookup('ansible.builtin.template', 'compute_spec.yml.j2', template_vars=dict(vm_hot_plug_compute=vm_hot_plug_vm['compute'])) | from_yaml, recursive=true) }}" # noqa: yaml[line-length]
+...

@@ -1,0 +1,45 @@
+FROM registry.fedoraproject.org/fedora:41
+LABEL authors="David Dreggors <david.dreggors@redhat.com>"
+
+ENV USER=analysis
+ENV GROUPNAME=$USER
+ENV UID=12345
+ENV GID=23456
+ENV PATH="/app/.venv/bin:$PATH"
+ENV DISPLAY :99
+
+WORKDIR /app/
+COPY ["requirements.txt", "/app/"]
+COPY ./data /app/data
+COPY ./notebooks /app/notebooks
+
+RUN dnf update -y && \
+    dnf install -y \
+      gcc \
+      gcc-c++ \
+      python3 \
+      python3-devel \
+      xclip.x86_64 \
+      xorg-x11-server-Xvfb && \
+    groupadd \
+        --gid "$GID" \
+        "$GROUPNAME" && \
+    useradd \
+      --comment "RVTools Analysis User" \
+      --home "/app" \
+      --gid "$GID" \
+      --no-create-home \
+      --uid "$UID" \
+      $USER && \
+      chown -R $UID:$GID /app
+
+USER $USER
+RUN /usr/bin/python3 -m venv /app/.venv && \
+  source /app/.venv/bin/activate && \
+  /app/.venv/bin/pip install --upgrade pip
+
+RUN sed -e 's/==/>=/g' /app/requirements.txt && \
+  /app/.venv/bin/pip install -r requirements.txt
+
+EXPOSE 8888
+ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0"]

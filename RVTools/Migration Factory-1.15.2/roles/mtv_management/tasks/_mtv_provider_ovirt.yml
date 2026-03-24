@@ -1,0 +1,88 @@
+---
+
+- name: _mtv_provider_ovirt | Verify credential name provided when more than one credential specified
+  when: not single_ovirt_target
+  ansible.builtin.assert:
+    that:
+      - "'name' in ovirt_target"
+    fail_msg: "'name' must be provided when more than 1 Ovirt Target specified"
+
+- name: _mtv_provider_ovirt | Set provider name
+  ansible.builtin.set_fact:
+    populated_ovirt_target: "{{ ovirt_target | ansible.builtin.combine({'name': mtv_management_ovirt_provider_default_name | infra.openshift_virtualization_migration.rfc1123}) if single_ovirt_target and 'name' not in ovirt_target else ovirt_target | ansible.builtin.combine({'name': ovirt_target['name'] | infra.openshift_virtualization_migration.rfc1123}) }}" # noqa: yaml[line-length]
+
+- name: _mtv_provider_ovirt | Validate required Ovirt provider Properties
+  ansible.builtin.assert:
+    that:
+      - "'host' in populated_ovirt_target"
+      - populated_ovirt_target.host | default("", true) | length > 0
+      - "'username' in populated_ovirt_target"
+      - populated_ovirt_target.username | default("", true) | length > 0
+      - "'password' in populated_ovirt_target"
+      - populated_ovirt_target.password | default("", true) | length > 0
+    quiet: true
+    fail_msg: "Required properties have not been set for Ovirt credential 'populated_ovirt_target.name'"
+
+- name: _mtv_provider_ovirt | Set Ovirt Provider URL
+  ansible.builtin.set_fact:
+    mtv_ovirt_url: https://{{ (populated_ovirt_target.host + (populated_ovirt_target['sdkEndpoint'] | default(mtv_management_ovirt_provider_default_sdk_endpoint)) | ansible.builtin.regex_replace('\/\/', '/')) | ansible.builtin.regex_replace('\/$', '') }} # noqa: yaml[line-length]
+
+- name: _mtv_provider_ovirt | MTV Certificate
+  when: "'certificate' not in populated_ovirt_target or (populated_ovirt_target['certificate'] | default('') | trim | length == 0)" # noqa: yaml[line-length]
+  block:
+    - name: _mtv_provider_ovirt | Retrieve Remote Ovirt Provider Certificate
+      community.crypto.get_certificate:
+        host: "{{ mtv_ovirt_url | urlsplit('hostname') }}"
+        port: "{{ (mtv_ovirt_url | urlsplit('port') | default('443', true)) | int }}"
+      register: mtv_remote_cert
+
+    - name: _mtv_provider_ovirt | Set Ovirt Provider Certificate
+      ansible.builtin.set_fact:
+        populated_ovirt_target: "{{ populated_ovirt_target | ansible.builtin.combine({'certificate': mtv_remote_cert.cert}) }}" # noqa: yaml[line-length]
+
+- name: _mtv_provider_ovirt | Set Provider Secret Name/Namespace (Configuration)
+  when: "'credentialsSecretRef' in populated_ovirt_target and (populated_ovirt_target['credentialsSecretRef'] | default('') | trim | length > 0)" # noqa: yaml[line-length]
+  ansible.builtin.set_fact:
+    ovirt_provider_secret_name: "{{ (populated_ovirt_target['credentialsSecretRef'] | ansible.builtin.split('/'))[1] if populated_ovirt_target['credentialsSecretRef'] | ansible.builtin.split('/') | length == 2 else populated_ovirt_target['credentialsSecretRef'] }}" # noqa: yaml[line-length]
+    ovirt_provider_secret_namespace: "(populated_ovirt_target['credentialsSecretRef'] | ansible.builtin.split('/'))[0] if populated_ovirt_target['network_attachment_definition'] | ansible.builtin.split('/') | length == 2 else mtv_management_provider_namespace }}" # noqa: yaml[line-length]
+
+- name: _mtv_provider_ovirt | Configure Provider Secret
+  when: "'credentialsSecretRef' not in populated_ovirt_target or (populated_ovirt_target['credentialsSecretRef'] | default('') | trim | length == 0)" # noqa: yaml[line-length]
+  block:
+    - name: _mtv_provider_ovirt | Set Provider Secret Name/Namespace (Generated)
+      when: "'credentialsSecretRef' not in populated_ovirt_target or (populated_ovirt_target['credentialsSecretRef'] | default('') | trim | length == 0)" # noqa: yaml[line-length]
+      ansible.builtin.set_fact:
+        ovirt_provider_secret_name: "ovirt-{{ populated_ovirt_target['name'] }}-credentials"
+        ovirt_provider_secret_namespace: "{{ mtv_management_provider_namespace }}"
+
+    - name: _mtv_provider_ovirt | Create Ovirt credentials secret
+      when: "'credentialsSecretRef' not in populated_ovirt_target or (populated_ovirt_target['credentialsSecretRef'] | default('') | trim | length == 0)" # noqa: yaml[line-length]
+      redhat.openshift.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          type: Opaque
+          metadata:
+            name: "{{ ovirt_provider_secret_name }}"
+            namespace: "{{ ovirt_provider_secret_namespace }}"
+          data:
+            insecureSkipVerify: "{{ (populated_ovirt_target.insecureSkipTlsVerify | default(mtv_management_ovirt_provider_insecure_skip_tls_verify) | bool) | b64encode if 'certificate' not in populated_ovirt_target or populated_ovirt_target['certificate'] | default('') | trim | length == 0 else false | b64encode }}" # noqa: yaml[line-length]
+            password: "{{ populated_ovirt_target.password | b64encode }}"
+            url: "{{ mtv_ovirt_url | b64encode }}"
+            user: "{{ populated_ovirt_target.username | b64encode }}"
+            cacert: "{{ populated_ovirt_target.certificate | b64encode }}"
+        apply: true
+
+- name: _mtv_provider_ovirt | Create Ovirt Provider resource
+  redhat.openshift.k8s:
+    state: present
+    definition: "{{ (lookup('ansible.builtin.template', 'ovirt_provider_skeleton.yml.j2') | from_yaml) }}"
+    apply: true
+  register: r_ovirt_provider
+  retries: 100
+  delay: 10
+  until:
+    - r_ovirt_provider.result is defined
+    - r_ovirt_provider.result | length > 0
+...

@@ -1,0 +1,7 @@
+---
+minor_changes:
+  - Adds support for specifying credentials for the VDDK init image
+bugfixes:
+  - Corrected VDDK variable names
+  - Corrected mtv_management_migration_namespace variable name
+...

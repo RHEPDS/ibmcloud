@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Add variable to disable dependency checking for controller_configuration which was causing a failure
+...

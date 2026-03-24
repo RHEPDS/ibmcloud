@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - Additional check for empty nmstate and mapping properties of migration_targets
+...

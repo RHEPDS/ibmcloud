@@ -1,0 +1,16 @@
+FROM registry.access.redhat.com/ubi9/ubi
+LABEL author="Dan Borkowski <dan.borkowski@redhat.com>"
+
+WORKDIR /app/
+
+COPY ["requirements.txt", "/app/"]
+
+RUN dnf upgrade -y && \
+    dnf install -y gcc gcc-c++ python3 python3-devel && \
+    python3 -m venv /opt/venv && \
+    pip install --upgrade pip && \
+    dnf remove -y python3-requests && \
+    pip install -r /app/requirements.txt
+
+EXPOSE 8888
+ENTRYPOINT ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0"]

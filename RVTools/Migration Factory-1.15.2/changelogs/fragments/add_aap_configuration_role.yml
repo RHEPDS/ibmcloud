@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - Add infra.virt_migration_factory.aap_deploy role
+  - Update migration_factory_aap playbook to use new role
+...

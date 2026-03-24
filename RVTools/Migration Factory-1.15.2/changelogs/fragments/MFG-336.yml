@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Verify AAP components are running after installation.
+...

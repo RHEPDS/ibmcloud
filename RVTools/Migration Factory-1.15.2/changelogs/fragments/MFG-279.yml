@@ -1,0 +1,6 @@
+---
+trivial:
+  - Updated ci test and release process
+  - Integrated automated collection and role README generation (Docsible)
+  - Added files that are not expected in the Ansible galaxy built artifact to the ignore list
+...

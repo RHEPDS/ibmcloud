@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Added the ability to specify the namespace Providers, StorageMaps and NetworkMaps are created in
+...

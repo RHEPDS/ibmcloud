@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Added path support for VM and Folder migrations
+...

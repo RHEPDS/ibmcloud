@@ -1,0 +1,24 @@
+---
+minor_changes:
+  - Fixed Jinja2 spacing in roles mtv_migrate mtv_management to pass ansible linting
+  - Fixed literal true/false in mtv_migrate role when conditional
+  - Fixed var-naming linting errors by conforming to ROLENAME_VARNAME
+  - Added fqcn[canonical] exception in .ansible-lint-ignore to avoid bug
+    suggesting kubernetes.core.k8s_info instead of redhat.openshift.k8s
+  - Added meta/argument_specs.yml to mtv_migrate role
+  - Added docsible hints to mtv_migrate defaults/main.yml
+  - Added docsible hints to mtv_management defaults/main.yml
+  - Switched docsible to run against individual roles instead of the entire collection
+  - Added docsible role template to remove the version number that created a lot of churn
+  - Updated the role READMEs to include a space for static content
+
+bugfixes:
+  - Remove dependencies in mtv_migrate role
+  - Fixed requirements file to add redhat.openshift_virtualization collection
+  - Fixed pipeline to properly cache roles that were included in the base image
+  - Correct invalid variable in vm_lifecycle role
+
+trivial:
+  - Formatting in rfc1123.py to align with ansible-test  requirements
+  - Added tox-ansible for sanity and integration testing in the pipeline
+...

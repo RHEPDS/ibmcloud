@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - Remove roles tor_switch_gathering, tor_switch_migrate, pre_config
+  - Remove playbooks pre_config.yml and tor_switch.yml
+  - Remove migration_targets role
+...

@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Validate vms_per_plan property
+...

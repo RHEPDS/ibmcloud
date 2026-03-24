@@ -1,0 +1,44 @@
+---
+- name: Set controller_configuration vars
+  ansible.builtin.set_fact:
+    controller_dependency_check: "{{ aap_seed_controller_dependency_check }}"
+    controller_configuration_async_retries: "{{ aap_seed_controller_configuration_async_retries }}"
+    "{{ aap_seed_controller_organizations_var }}": "{{ aap_seed_controller_organizations }}"  # noqa: var-naming[no-jinja]  # noqa: yaml[line-length]
+    controller_projects: "{{ aap_seed_controller_projects }}"
+    controller_execution_environments: "{{ aap_seed_controller_execution_environments }}"
+    controller_credential_types: "{{ aap_seed_controller_credential_types }}"
+    controller_inventories: "{{ aap_seed_controller_inventories }}"
+    controller_hosts: "{{ aap_seed_controller_hosts }}"
+
+- name: Build Credentials
+  ansible.builtin.include_tasks:
+    file: credentials.yml
+
+- name: Build Job Templates
+  ansible.builtin.include_tasks:
+    file: job_templates.yml
+
+- name: Build Workflows
+  ansible.builtin.include_tasks:
+    file: workflows.yml
+
+- name: Wait for API to become available
+  retries: 300
+  delay: 5
+  register: api_status
+  until: api_status.status == 200
+  ansible.builtin.uri:
+    url: https://{{ aap_seed_controller_hostname }}/api{{ '/controller' if aap_version is not defined or aap_version is defined and aap_version is version('2.5', '>=') }}/v2/config/ # noqa: yaml[line-length]
+    method: GET
+    user: "{{ aap_seed_controller_username }}"
+    password: "{{ aap_seed_controller_password }}"
+    body_format: json
+    validate_certs: false
+    force_basic_auth: true
+
+- name: Call dispatch role
+  ansible.builtin.include_role:
+    name: "{{ aap_seed_cac_collection }}.dispatch"
+  vars:
+    controller_configuration_secure_logging: false
+...

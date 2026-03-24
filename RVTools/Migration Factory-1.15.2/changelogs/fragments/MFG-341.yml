@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - Updated variables and documentation for vm_backup_restore role
+...

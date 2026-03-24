@@ -1,0 +1,9 @@
+domain:
+{% if 'cpu' in vm_hot_plug_compute and vm_hot_plug_compute['cpu'] is not none  %}
+  cpu:
+    {{ vm_hot_plug_compute['cpu'] | from_yaml }}
+{% endif %}
+{% if 'memory' in vm_hot_plug_compute and vm_hot_plug_compute['memory'] is not none  %}
+  memory:
+    guest: {{ vm_hot_plug_compute['memory'] }}
+{% endif %}
