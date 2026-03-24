@@ -14,8 +14,4 @@ https://catalog.demo.redhat.com/workshop/722wx2
 
 https://www.redhat.com/en/interactive-experiences
 
-### Interactive experience (work also without any Login)
-
-https://www.redhat.com/en/interactive-experiences
-
 
