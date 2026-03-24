@@ -2,11 +2,11 @@
 
 ## There are two identical labs provided (for 20 Useres each)
 
-## LAB I
+## LAB A
 
 https://catalog.demo.redhat.com/workshop/h288af
 
-## LAB II
+## LAB B
 
 https://catalog.demo.redhat.com/workshop/722wx2
 
