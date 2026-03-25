@@ -1,4 +1,0 @@
----
-minor_changes:
-  - Rename nmstate role to network_mgmt and support for manually defining network configurations
-...

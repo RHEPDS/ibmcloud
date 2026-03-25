@@ -1,4 +1,0 @@
----
-minor_changes:
-  - Added setup_env.sh script for installing local tools including pre-commit
-...

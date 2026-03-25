@@ -1,5 +1,0 @@
----
-trivial:
-  - Add a default Gitlab merge request template to the repository
-  - Update collection description and build ignore list
-...
