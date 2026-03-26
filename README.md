@@ -18,4 +18,6 @@ https://catalog.partner.demo.redhat.com/workshop/uwajqm
 
 https://www.redhat.com/en/interactive-experiences
 
+## Alfreds tool
 
+https://github.com/alfbach/amt
