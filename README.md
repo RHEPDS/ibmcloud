@@ -16,7 +16,7 @@ https://catalog.partner.demo.redhat.com/workshop/uwajqm
 
 ## Partner Demo Platform
 
-https://www.redhat.com/en/interactive-experiences
+https://partner.demo.redhat.com/
 
 ## Alfreds tool
 
